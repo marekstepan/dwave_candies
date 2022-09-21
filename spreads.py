@@ -38,14 +38,27 @@ G.add_nodes_from(nodes)
 edges = []
 
 for i in range(0, len(spreads) - 1):
+    if (int(spreads[i][2][0:2].lstrip("0")) < int(spreads[i][3][0:2].lstrip("0"))) or \
+            ((int(spreads[i][2][0:2].lstrip("0")) == int(spreads[i][3][0:2].lstrip("0"))) and
+             (int(spreads[i][2][3:].lstrip("0")) <= int(spreads[i][3][3:].lstrip("0")))):
+        exit_year1 = 2021
+    else:
+        exit_year1 = 2022
+
     entry_day = date(2021, int(spreads[i][2][0:2].lstrip("0")),
                      int(spreads[i][2][3:].lstrip("0"))).timetuple().tm_yday
-    exit_day = date(2021, int(spreads[i][3][0:2].lstrip("0")),
+    exit_day = date(exit_year1, int(spreads[i][3][0:2].lstrip("0")),
                     int(spreads[i][3][3:].lstrip("0"))).timetuple().tm_yday
     for j in range(0, len(spreads) - i - 1):
+        if (int(spreads[j + i + 1][2][0:2].lstrip("0")) < int(spreads[i][3][0:2].lstrip("0"))) or \
+                ((int(spreads[j + i + 1][2][0:2].lstrip("0")) == int(spreads[i][3][0:2].lstrip("0"))) and
+                 (int(spreads[j + i + 1][2][3:].lstrip("0")) <= int(spreads[i][3][3:].lstrip("0")))):
+            exit_year2 = 2021
+        else:
+            exit_year2 = 2022
         entry_day_compared = date(2021, int(spreads[j + i + 1][2][0:2].lstrip("0")),
                                   int(spreads[j + i + 1][2][3:].lstrip("0"))).timetuple().tm_yday
-        exit_day_compared = date(2021, int(spreads[j + i + 1][3][0:2].lstrip("0")),
+        exit_day_compared = date(exit_year2, int(spreads[j + i + 1][3][0:2].lstrip("0")),
                                  int(spreads[j + i + 1][3][3:].lstrip("0"))).timetuple().tm_yday
         if ((entry_day <= entry_day_compared and exit_day >= exit_day_compared) or
                 (entry_day_compared < entry_day <= exit_day_compared) or
