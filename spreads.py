@@ -59,7 +59,7 @@ G.add_edges_from(edges)
 
 # Find the maximum weighted independent set, S
 S = dnx.maximum_weighted_independent_set(G, weight="profitability", sampler=sampler, lagrange=2.0, num_reads=10,
-                                         label='Example - Antenna Selection')
+                                         label='Spreads selection')
 
 # Print the solution for the user
 print('Selected spreads:')
