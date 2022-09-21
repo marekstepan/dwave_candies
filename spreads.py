@@ -3,7 +3,7 @@ from datetime import date
 
 # Import networkx for graph tools
 import networkx as nx
-
+from operator import itemgetter
 import os
 
 # Import dwave_networkx for d-wave graph tools/functions
@@ -34,7 +34,8 @@ for spread in spreads:
 
 G.add_nodes_from(nodes)
 
-# Create list of edges
+# Create lists of nodes and edges
+nodes = []
 edges = []
 
 for i in range(0, len(spreads) - 1):
@@ -49,6 +50,11 @@ for i in range(0, len(spreads) - 1):
                      int(spreads[i][2][3:].lstrip("0"))).timetuple().tm_yday
     exit_day = date(exit_year1, int(spreads[i][3][0:2].lstrip("0")),
                     int(spreads[i][3][3:].lstrip("0"))).timetuple().tm_yday
+
+    trade_days = exit_day - entry_day
+    node = (spreads[i][0], {"profitability": float(spreads[i][4]) / float(spreads[i][5]) / trade_days * (-1)})
+    nodes.append(node)
+
     for j in range(0, len(spreads) - i - 1):
         if (int(spreads[j + i + 1][2][0:2].lstrip("0")) < int(spreads[i][3][0:2].lstrip("0"))) or \
                 ((int(spreads[j + i + 1][2][0:2].lstrip("0")) == int(spreads[i][3][0:2].lstrip("0"))) and
@@ -67,13 +73,22 @@ for i in range(0, len(spreads) - 1):
             spread_b_id = "Id_" + str(j + i + 2)
             edges.append((spread_a_id, spread_b_id))
 
-# Add edges to graph - this also adds the nodes
+# Add nodes and edges to graph
+G.add_nodes_from(nodes)
 G.add_edges_from(edges)
 
 # Find the maximum weighted independent set, S
 S = dnx.maximum_weighted_independent_set(G, weight="profitability", sampler=sampler, lagrange=2.0, num_reads=10,
                                          label='Spreads selection')
 
+spread_indexes = []
+
+for selected_node in S:
+    spread_indexes.append(int(selected_node.split("_")[1]) - 1)
+
+selected_spreads = list(spreads[k] for k in spread_indexes)
+sorted_result = sorted(selected_spreads, key=itemgetter(2))
+
 # Print the solution for the user
 print('Selected spreads:')
-print(S)
+print(sorted_result)
